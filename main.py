@@ -30,7 +30,7 @@ total_rows = 0
 # READ FILE
 # =====================================================
 
-data, extension = read_any_file()
+data, extension, temp_file_path = read_any_file()
 
 # =====================================================
 # CSV FILE
@@ -135,6 +135,15 @@ move_file_to_archive()
 # DONE
 # =====================================================
 
+import os
+
+if os.path.exists(temp_file_path):
+
+    os.remove(temp_file_path)
+
+    print("\nTEMP FILE DELETED!\n")
+
+    
 print(
     "\nETL COMPLETED SUCCESSFULLY!\n"
 )

@@ -2,7 +2,7 @@ import pandas as pd
 import paramiko
 import tempfile
 import json
-import io
+import io,os
 
 from server import (
     ftp_host,
@@ -95,7 +95,7 @@ def read_any_file():
             low_memory=False
         )
 
-        return chunks, extension
+        return chunks, extension, temp_file.name
 
     # =====================================================
     # READ EXCEL
@@ -108,7 +108,7 @@ def read_any_file():
             dtype=str
         )
 
-        return df, extension
+        return df, extension, temp_file.name
 
     # =====================================================
     # READ JSON
@@ -138,7 +138,7 @@ def read_any_file():
                 "Unsupported JSON format"
             )
 
-        return df, extension
+        return df, extension, temp_file.name
 
     # =====================================================
     # UNSUPPORTED

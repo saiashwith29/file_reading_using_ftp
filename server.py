@@ -20,13 +20,13 @@ ftp_port = 22
 ftp_username = "DHR_Test_User"
 ftp_password = "sU9cYZAcMLS3CeJkbSTHzDfiP4LxKsXFhl66MFWq"
 
-ftp_file_path = "/Test/transfer_transfer_transfer_real_1gb_data.csv"
+ftp_file_path = "/Today/transfer_real_1gb_data.csv"
 
 # =====================================================
 # TABLE
 # =====================================================
 
-table_name = "s"
+table_name = "da"
 
 # =====================================================
 # PERFORMANCE
