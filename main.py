@@ -1,16 +1,17 @@
 import time
+import os
 import pandas as pd
-
-from server import (
-    engine,
-    table_name
-)
 
 from read_file import read_any_file
 
 from sql import insert_into_sql
 
 from move_file import move_file_to_archive
+
+from server import (
+    FILES_TO_PROCESS,
+    engine
+)
 
 # =====================================================
 # START TIMER
@@ -21,87 +22,153 @@ start_time = time.time()
 print("\nSTARTING ETL PROCESS...\n")
 
 # =====================================================
-# TOTAL ROW COUNTER
+# PROCESS EACH FILE
 # =====================================================
 
-total_rows = 0
+for file_config in FILES_TO_PROCESS:
 
-# =====================================================
-# READ FILE
-# =====================================================
+    ftp_file_path = file_config["ftp_file_path"]
 
-data, extension, temp_file_path = read_any_file()
+    table_name = file_config["table_name"]
 
-# =====================================================
-# CSV FILE
-# =====================================================
+    create_new_table = file_config["create_new_table"]
 
-if extension == "csv":
+    create_new_columns = file_config["create_new_columns"]
 
-    first_chunk = True
+    temp_file_path = None
 
-    for chunk in data:
+    try:
 
-        # SKIP EMPTY CHUNKS
-        if chunk is None:
-            continue
+        print(f"\nPROCESSING FILE: {ftp_file_path}\n")
 
-        if len(chunk) == 0:
-            continue
+        # =====================================================
+        # READ FILE
+        # =====================================================
 
-        # ROW COUNT
-        chunk_rows = len(chunk)
+        data, extension, temp_file_path = read_any_file(
+            ftp_file_path
+        )
 
-        total_rows += chunk_rows
+        total_rows = 0
+
+        # =====================================================
+        # CSV
+        # =====================================================
+
+        if extension == "csv":
+
+            first_chunk = True
+
+            for chunk in data:
+
+                if chunk is None:
+                    continue
+
+                if chunk.empty:
+                    continue
+
+                rows = len(chunk)
+
+                total_rows += rows
+
+                print(
+                    f"\nPROCESSING {rows} ROWS...\n"
+                )
+
+                insert_into_sql(
+                    chunk=chunk,
+                    engine=engine,
+                    table_name=table_name,
+                    first_chunk=first_chunk,
+                    create_new_table=create_new_table,
+                    create_new_columns=create_new_columns
+                )
+
+                first_chunk = False
+
+        # =====================================================
+        # EXCEL / JSON
+        # =====================================================
+
+        else:
+
+            chunk = data
+
+            if chunk is not None and not chunk.empty:
+
+                rows = len(chunk)
+
+                total_rows += rows
+
+                print(
+                    f"\nPROCESSING {rows} ROWS...\n"
+                )
+
+                insert_into_sql(
+                    chunk=chunk,
+                    engine=engine,
+                    table_name=table_name,
+                    first_chunk=True,
+                    create_new_table=create_new_table,
+                    create_new_columns=create_new_columns
+                )
+
+        # =====================================================
+        # MOVE FILE AFTER SUCCESS
+        # =====================================================
+
+        move_file_to_archive(
+            ftp_file_path
+        )
 
         print(
-            f"\nPROCESSING {chunk_rows} ROWS...\n"
+            f"\nTOTAL ROWS INSERTED: "
+            f"{total_rows}"
         )
-
-        # INSERT INTO SQL
-        insert_into_sql(
-            chunk=chunk,
-            engine=engine,
-            table_name=table_name,
-            first_chunk=first_chunk
-        )
-
-        first_chunk = False
-
-# =====================================================
-# EXCEL / JSON
-# =====================================================
-
-elif extension in ["xlsx", "xls", "json"]:
-
-    chunk = data
-
-    if chunk is not None and len(chunk) > 0:
-
-        chunk_rows = len(chunk)
-
-        total_rows += chunk_rows
 
         print(
-            f"\nPROCESSING {chunk_rows} ROWS...\n"
+            f"\nFILE COMPLETED: "
+            f"{ftp_file_path}"
         )
 
-        insert_into_sql(
-            chunk=chunk,
-            engine=engine,
-            table_name=table_name,
-            first_chunk=True
-        )
+    # =====================================================
+    # ERROR
+    # =====================================================
 
-# =====================================================
-# UNSUPPORTED
-# =====================================================
+    except Exception as e:
 
-else:
+        print("\nFILE FAILED!\n")
 
-    raise Exception(
-        f"Unsupported extension: {extension}"
-    )
+        print(str(e))
+
+    # =====================================================
+    # ALWAYS DELETE TEMP FILE
+    # =====================================================
+
+    finally:
+
+        try:
+
+            if (
+                temp_file_path
+                and
+                os.path.exists(temp_file_path)
+            ):
+
+                os.remove(temp_file_path)
+
+                print(
+                    "\nTEMP FILE DELETED "
+                    "SUCCESSFULLY!\n"
+                )
+
+        except Exception as delete_error:
+
+            print(
+                "\nFAILED TO DELETE TEMP FILE:\n"
+            )
+
+            print(str(delete_error))
 
 # =====================================================
 # END TIMER
@@ -109,41 +176,10 @@ else:
 
 end_time = time.time()
 
-# =====================================================
-# TOTAL TIME
-# =====================================================
-
-total_time = (
-    end_time - start_time
-)
-
 print(
-    f"\nTOTAL ROWS INSERTED: {total_rows}"
+    f"\nTOTAL ETL TIME: "
+    f"{end_time - start_time:.2f} seconds"
 )
 
-print(
-    f"\nTOTAL TIME: {total_time:.2f} seconds"
-)
+print("\nETL PROCESS COMPLETED!\n")
 
-# =====================================================
-# MOVE FILE TO ARCHIVE
-# =====================================================
-
-move_file_to_archive()
-
-# =====================================================
-# DONE
-# =====================================================
-
-import os
-
-if os.path.exists(temp_file_path):
-
-    os.remove(temp_file_path)
-
-    print("\nTEMP FILE DELETED!\n")
-
-    
-print(
-    "\nETL COMPLETED SUCCESSFULLY!\n"
-)

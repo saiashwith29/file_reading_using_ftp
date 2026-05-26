@@ -6,7 +6,6 @@ from server import (
     ftp_port,
     ftp_username,
     ftp_password,
-    ftp_file_path,
     archive_folder
 )
 
@@ -14,7 +13,7 @@ from server import (
 # MOVE FILE TO ARCHIVE
 # =====================================================
 
-def move_file_to_archive():
+def move_file_to_archive(ftp_file_path):
 
     print("\nMOVING FILE TO ARCHIVE...\n")
 

@@ -5,7 +5,7 @@ from sqlalchemy import inspect
 from sqlalchemy import text
 
 from server import (
-    SQL_BATCH_SIZE
+     INSERT_CHUNK_SIZE
 )
 
 # =====================================================
@@ -247,7 +247,7 @@ def insert_into_sql(
                 if_exists='append',
                 index=False,
                 method=None,
-                chunksize=1000
+                chunksize=INSERT_CHUNK_SIZE
             )
 
             print(

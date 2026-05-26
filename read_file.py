@@ -9,7 +9,6 @@ from server import (
     ftp_port,
     ftp_username,
     ftp_password,
-    ftp_file_path,
     READ_CHUNK_SIZE
 )
 
@@ -17,7 +16,7 @@ from server import (
 # READ FILE
 # =====================================================
 
-def read_any_file():
+def read_any_file(ftp_file_path):
 
     print("\nCONNECTING TO SFTP...\n")
 
