@@ -109,42 +109,60 @@ def read_any_file(ftp_file_path):
 
         return df, extension, temp_file.name
 
-    # =====================================================
-    # READ JSON
-    # =====================================================
+    
+
+# =====================================================
+# READ JSON
+# =====================================================
 
     elif extension == "json":
 
         with open(
-            temp_file.name,
-            "r",
-            encoding="latin1"
-        ) as f:
+        temp_file.name,
+        "r",
+        encoding="utf-8"
+    ) as f:
 
             json_data = json.load(f)
 
-        if isinstance(json_data, list):
+    # =================================================
+    # CASE 1 → LIST
+    # =================================================
 
-            df = pd.DataFrame(json_data)
+    if isinstance(json_data, list):
 
-        elif isinstance(json_data, dict):
+        df = pd.DataFrame(json_data)
+
+    # =================================================
+    # CASE 2 → DICT
+    # =================================================
+
+    elif isinstance(json_data, dict):
+
+        list_found = False
+
+        for key, value in json_data.items():
+
+            if isinstance(value, list):
+
+                df = pd.DataFrame(value)
+
+                list_found = True
+
+                break
+
+        if not list_found:
 
             df = pd.DataFrame([json_data])
 
-        else:
-
-            raise Exception(
-                "Unsupported JSON format"
-            )
-
-        return df, extension, temp_file.name
-
-    # =====================================================
+    # =================================================
     # UNSUPPORTED
-    # =====================================================
+    # =================================================
 
     else:
 
         raise Exception(
-            f"Unsupported file type: {extension}"
+            "Unsupported JSON format"
         )
+
+    return df, extension, temp_file.name

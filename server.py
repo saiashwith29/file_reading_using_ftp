@@ -27,12 +27,35 @@ ftp_password = "sU9cYZAcMLS3CeJkbSTHzDfiP4LxKsXFhl66MFWq"
 FILES_TO_PROCESS = [
 
     {
-        "ftp_file_path": "/Test/Archive/real_1gb_data.csv",
-        "table_name": "table6",
+        "ftp_file_path": "/Today/airports.json",
+        "table_name": "table10",
         "create_new_table": True,
         "create_new_columns": True
-    }
-
+    },
+    # {
+    #     "ftp_file_path": "/Today/future_Orders_20260408.csv",
+    #     "table_name": "table2",
+    #     "create_new_table": True,
+    #     "create_new_columns": True
+    # },
+    # {
+    #     "ftp_file_path": "/Today/future_Orders_20260409.csv",
+    #     "table_name": "table3",
+    #     "create_new_table": True,
+    #     "create_new_columns": True
+    # },
+    # {
+    #     "ftp_file_path": "/Today/future_Orders_20260410.csv",
+    #     "table_name": "table4",
+    #     "create_new_table": True,
+    #     "create_new_columns": True
+    # },
+    # {
+    #     "ftp_file_path": "/Today/future_Orders_20260413.csv",
+    #     "table_name": "table5",
+    #     "create_new_table": True,
+    #     "create_new_columns": True
+    # }
 ]
 
 # =====================================================
@@ -64,5 +87,5 @@ engine = create_engine(
 # ARCHIVE
 # =====================================================
 
-archive_folder = "/Test"
+archive_folder = "/Today/Archive"
 
